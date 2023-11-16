@@ -25,7 +25,7 @@ Ruby, and BASIC have a REPL that lets you directly interact with the language.
 Java didn't for a long time, although one called JShell was released
 relatively recently (2017).
 
-When you run our BASIC interpreter, you'll get the prompt ">".
+When you run our BASIC interpreter, you'll get the prompt "]".
 This is the REPL prompt. You can enter a BASIC statement like
 PRINT "Hello, world!" There are also interpreter-level commands for
 loading, saving and running programs.
@@ -46,7 +46,8 @@ Later:
 LOAD "InfiniteHello.basic"
 RUN
 
-Your project goal is to run these 2 programs. Let's run through how it works:
+Your project goal is to run two programs, Age.basic and RollSnakeEyes.basic.
+Let's run through how it works:
 
 Age.basic:
 10 PRINT "HI, WHAT IS YOUR NAME?"
@@ -61,7 +62,7 @@ RollSnakeEyes.basic:
 20 REM from the Unit 4 Test.
 30 REM If you've implemented the BASIC features required for this
 40 REM project, this code should run correctly.
-50 REM You will need to implement the INT() and RND() functions,
+50 REM You will need to implement the INPUT statement, RND() function,
 60 REM and the IF statement.
 100 PRINT "COMPUTING HOW MANY ROLLS IT TAKES TO GET SNAKE EYES"
 110 ROLLS = 0
@@ -112,6 +113,10 @@ How to implement INPUT
 Lexical Scanner Support:
 There are a few things you need to do. INPUT is a reserved word in BASIC,
 so you need to register the new reserved word with the lexical scanner.
+The lexical scanner is the part of the BASIC interpreter responsible for
+turning the input characters of BASIC source into BASIC "tokens" that the
+recursive descent parser can understand.
+
 In LexicalScanner.java, find the list of reserved words and add INPUT to it.
 In TokenType.java, you'll need to add INPUT to the enumerated type TokenType.
 
@@ -124,15 +129,15 @@ except that instead of a value on the right side, it takes its input from the us
 But both assignment statement and INPUT take a variable name.
 So you can model your new class InputNode on the existing AssignmentNode class.
 Copy AssignmentNode.java into a new file InputNode.java and change all
-occurrences of AssignmentNode to InputNode. OperandNode is a good suitable
+occurrences of AssignmentNode to InputNode. IdentifierNode is a good suitable
 type for storing the variable name that you're storing into, so you can leave
 that the same from AssignmentNode.
 
 Next, you can take out any mention of the "right" value since there is no right
 side of the assignment... you'll be reading it from the user. Then change the
 evaluate() method so that instead of evaluating the right side expression and
-assigning it to the variable, it reads a line of text from the user and
-assigns that to the variable.
+assigning it to the variable, it reads a line of text or a double number from
+the user and assigns that to the variable.
 
 There is already a Scanner you can use in your evaluate() method by calling
 context.getScanner(). If the variable name ends in "$", it's a string variable
@@ -146,7 +151,7 @@ AssignmentNode.
 
 Make sure you implement the toString() method, because this is how the
 LIST and SAVE commands work on your new statement type. It should return
-just the string "INPUT " followed by the toString() of the OperandNode
+just the string "INPUT " followed by the toString() of the IdentifierNode
 for your variable name.
 
 Parser Support:
@@ -169,8 +174,14 @@ The IF statement evaluates an expression, and if the result is non-zero
   30 I=I+1
   40 IF I < 100 THEN GOTO 10
 
+So, the grammar for the IF statement is
+  IF condition_expression THEN then_statement
+
+(Back then we didn't HAVE the optional ELSE clause! What sweet heaven it
+would have been to have an ELSE clause!)
+
 The relational operators in BASIC like < and > and = return 1 and 0
-instad of "true" and "false". Note that the equality operator is just
+instead of "true" and "false". Note that the equality operator is just
 "=", not "=="! And the does-not-equal operator is "<>", not "!=".
 The relational and equality operators are already supported, so you don't
 have to implement those, but you'll be able to use them in your IF
@@ -181,7 +192,7 @@ How to implement IF
 
 Lexical Scanner Support:
 There are two new reserved words for the IF statement, IF and THEN.
-Register both of these with the lexical scanner in the same way you'
+Register both of these with the lexical scanner in the same way you
 did INPUT.
 
 AST Node:
@@ -189,7 +200,8 @@ Create an IfNode class which is a subclass of ASTNode. It should have
 two private instance variables, "condition" and "statement".
 The evaluate() method for IfNode should evaluate condition.
 If the Value that comes back is non-zero, you then want to evaluate
-statement. You can check if the Value is non-zero using the
+"statement", because that's how you execute the statement when
+the condition is true. You can check if the Value is non-zero using the
 "isTruthy" method.
 
 The toString() method of IfNode should return something like
@@ -204,7 +216,8 @@ token, match it with match(), and then parse the condition with
 expression(). Then make sure the THEN token is there... you can check
 if the token in "lookahead" is of the TokenType.THEN type. If it is,
 match(), and then parse the IF's statement with statement().
-(If it isn't, throw an exception.)
+(If it isn't, throw an exception. You can see lots of other exception
+throws in RecursiveDescentParser.java; copy one of those.)
 Lastly, construct an IfNode with the condition and statement you found.
 
 3. RND() function
@@ -220,6 +233,8 @@ Look in FunctionCallNode.java and follow the model for functions such
 as INT. The difference is that RND() doesn't even take any arguments
 so you don't need to deal with those. Just call Math.random() and set
 that as the returned value from the function call.
+Note that this language is so basic (ha) that you can't define your
+own user-defined functions. Only built-in ones can be used in expressions.
 
 Testing Your Work
 =================
@@ -228,7 +243,9 @@ If you've implemented the above 3 language features correctly, you
 should be able to run the Age.basic program and the RollSnakeEyes.basic
 program by loading them in with the LOAD command and running them with
 the RUN command. You should also be able to list out their source with
-the LIST command. You can do this by running your program and then typing
+the LIST command, and the output of LIST should match what's in the
+.basic files they came from.
+You can do this by running your program and then typing
 
  LOAD "Age.basic"
  LIST
@@ -238,10 +255,16 @@ the LIST command. You can do this by running your program and then typing
  LIST
  RUN
 
-That's it!
+Write Your Own BASIC Program
+============================
 
-Of course, if you finish these, you are welcome to add any other
-language features that you like.
+LASTLY, write a program of your own in BASIC and save it in your
+replit. Your program can do anything... it could be a translation of
+an earlier exercise we did from Java into BASIC, for example.
+
+Of course, if you finish all this, you are welcome to add any other
+language features that you like. You may find that you need additional
+language features to support a program that you want to write in BASIC.
 
 THE REAL DEAL
 =============

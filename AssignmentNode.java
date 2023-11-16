@@ -1,8 +1,8 @@
 class AssignmentNode extends ASTNode {
-  private final OperandNode left;
+  private final IdentifierNode left;
   private final ASTNode right;
 
-  public AssignmentNode(OperandNode left, ASTNode right) {
+  public AssignmentNode(IdentifierNode left, ASTNode right) {
     this.left = left;
     this.right = right;
   }
@@ -12,7 +12,7 @@ class AssignmentNode extends ASTNode {
   }
 
   public Value evaluate(Context context) {
-    String variableName = left.getToken().getValue();
+    String variableName = left.getIdentifier();
     Value value = right.evaluate(context);
     if (value.isNumber() && variableName.endsWith("$")) {
       throw new IllegalArgumentException("Type mismatch error");

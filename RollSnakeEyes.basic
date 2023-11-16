@@ -2,7 +2,7 @@
 20 REM from the Unit 4 Test.
 30 REM If you've implemented the BASIC features required for this
 40 REM project, this code should run correctly.
-50 REM You will need to implement the RND() function
+50 REM You will need to implement the INPUT statement, RND() function,
 60 REM and the IF statement.
 100 PRINT "COMPUTING HOW MANY ROLLS IT TAKES TO GET SNAKE EYES"
 110 ROLLS = 0

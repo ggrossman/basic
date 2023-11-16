@@ -1,9 +1,9 @@
 import java.util.Scanner;
 
 public class InputNode extends ASTNode {
-  private final OperandNode identifier;
+  private final IdentifierNode identifier;
 
-  public InputNode(OperandNode identifier) {
+  public InputNode(IdentifierNode identifier) {
     this.identifier = identifier;
   }
 
@@ -12,7 +12,7 @@ public class InputNode extends ASTNode {
   }
 
   public Value evaluate(Context context) {
-    String name = identifier.getToken().getValue();
+    String name = identifier.getIdentifier();
     if (!name.endsWith("$")) {
       // Repeatedly ask for a number until we get a valid one
       while (true) {
