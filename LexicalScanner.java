@@ -11,10 +11,7 @@ public class LexicalScanner {
 
   static {
     reservedWords.put("print", TokenType.PRINT);
-    reservedWords.put("input", TokenType.INPUT);
     reservedWords.put("goto", TokenType.GOTO);
-    reservedWords.put("if", TokenType.IF);
-    reservedWords.put("then", TokenType.THEN);
     reservedWords.put("let", TokenType.LET);
     reservedWords.put("rem", TokenType.REM);
     reservedWords.put("list", TokenType.LIST);

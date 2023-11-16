@@ -1,0 +1,12 @@
+10 REM Print out the Fibonacci sequence (https://en.wikipedia.org/wiki/Fibonacci_sequence). This program needs the IF statement to be supported.
+20 PRINT 0
+30 PRINT 1
+40 LET F_MINUS_2=0
+50 LET F_MINUS_1=1
+60 LET I=1
+70 LET F=F_MINUS_1+F_MINUS_2
+80 PRINT F
+90 F_MINUS_2=F_MINUS_1
+100 F_MINUS_1=F
+110 I=I+1
+120 IF I<25 THEN GOTO 70

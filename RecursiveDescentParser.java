@@ -40,10 +40,7 @@ public class RecursiveDescentParser {
     } else if (lookahead.getType() == TokenType.PRINT) {
       match();
       result = new PrintNode(expression());
-    } else if (lookahead.getType() == TokenType.INPUT) {
-      match();
-      result = new InputNode(identifier());
-    } else if (lookahead.getType() == TokenType.RUN) {
+   } else if (lookahead.getType() == TokenType.RUN) {
       match();
       result = new RunNode();
     } else if (lookahead.getType() == TokenType.LOAD) {
@@ -59,13 +56,7 @@ public class RecursiveDescentParser {
         throw new IllegalArgumentException("Line number expected after GOTO");
       }
       result = new GotoNode(gotoLine);
-    } else if (lookahead.getType() == TokenType.IF) {
-      match();
-      ASTNode condition = expression();
-      match(new Token(TokenType.THEN, null));
-      ASTNode thenBranch = statement();
-      result = new IfNode(condition, thenBranch);
-   } else if (lookahead.getType() == TokenType.LIST) {
+    } else if (lookahead.getType() == TokenType.LIST) {
       match();
       result = new ListNode();
     } else if (lookahead.getType() == TokenType.IDENTIFIER || lookahead.getType() == TokenType.LET) {
@@ -73,8 +64,8 @@ public class RecursiveDescentParser {
         // LET is optional for variable declarations
         match();
       }
-      OperandNode lvalue = identifier();
-      if (lookahead.getType() == TokenType.OPERATOR && lookahead.getValue().equals("=")) {
+      IdentifierNode lvalue = identifier();
+      if (tokenIsOperator("=")) {
         match();
         result = new AssignmentNode(lvalue, expression());
       } else {
@@ -91,9 +82,9 @@ public class RecursiveDescentParser {
     }
   }
 
-  private OperandNode identifier() {
+  private IdentifierNode identifier() {
     if (lookahead.getType() == TokenType.IDENTIFIER) {
-      OperandNode result = new OperandNode(lookahead);
+      IdentifierNode result = new IdentifierNode(lookahead.getValue());
       match();
       return result;
     } else {
@@ -104,12 +95,11 @@ public class RecursiveDescentParser {
   // expression -> relational ((EQUALS | NOT_EQUALS) relational)*
   private ASTNode expression() {
     ASTNode node = relational();
-    while (lookahead.getType() == TokenType.OPERATOR &&
-        (lookahead.getValue().equals("=") || lookahead.getValue().equals("<>"))) {
-      Token op = lookahead;
+    while (tokenIsOperator("=") || tokenIsOperator("<>")) {
+      String operator = lookahead.getValue();
       match();
       ASTNode rightNode = relational();
-      node = new RelationalOperatorNode(op.getValue(), node, rightNode);
+      node = new RelationalOperatorNode(operator, node, rightNode);
     }
     return node;
   }
@@ -117,12 +107,12 @@ public class RecursiveDescentParser {
   // relational -> term ((LESS_THAN | GREATER_THAN | LESS_THAN_OR_EQUAL | GREATER_THAN_OR_EQUAL) term)*
   private ASTNode relational() {
     ASTNode node = additive();
-    while (lookahead.getType() == TokenType.OPERATOR &&
-        (lookahead.getValue().equals("<") || lookahead.getValue().equals(">") || lookahead.getValue().equals("<=") || lookahead.getValue().equals(">="))) {
-      Token op = lookahead;
+    while (tokenIsOperator("<") || tokenIsOperator(">") ||
+          tokenIsOperator("<=") || tokenIsOperator(">=")) {
+      String operator = lookahead.getValue();
       match();
       ASTNode rightNode = additive();
-      node = new RelationalOperatorNode(op.getValue(), node, rightNode);
+      node = new RelationalOperatorNode(operator, node, rightNode);
     }
     return node;
   }
@@ -130,12 +120,11 @@ public class RecursiveDescentParser {
   // additive -> term ((PLUS | MINUS) term)*
   private ASTNode additive() {
     ASTNode node = term();
-    while (lookahead.getType() == TokenType.OPERATOR &&
-        (lookahead.getValue().equals("+") || lookahead.getValue().equals("-"))) {
-      Token op = lookahead;
+    while (tokenIsOperator("+") || tokenIsOperator("-")) {
+      String operator = lookahead.getValue();
       match();
       ASTNode rightNode = term();
-      node = new ArithmeticOperatorNode(op.getValue(), node, rightNode);
+      node = new ArithmeticOperatorNode(operator, node, rightNode);
     }
     return node;
   }
@@ -143,19 +132,18 @@ public class RecursiveDescentParser {
   // term -> unary ((MUL | DIV) unary)*
   private ASTNode term() {
     ASTNode node = unary();
-    while (lookahead.getType() == TokenType.OPERATOR &&
-        (lookahead.getValue().equals("*") || lookahead.getValue().equals("/"))) {
-      Token op = lookahead;
+    while (tokenIsOperator("*") || tokenIsOperator("/")) {
+      String operator = lookahead.getValue();
       match();
       ASTNode rightNode = unary();
-      node = new ArithmeticOperatorNode(op.getValue(), node, rightNode);
+      node = new ArithmeticOperatorNode(operator, node, rightNode);
     }
     return node;
   }
 
   // unary -> MINUS factor | factor
   private ASTNode unary() {
-    if (lookahead.getType() == TokenType.OPERATOR && lookahead.getValue().equals("-")) {
+    if (tokenIsOperator("-")) {
       match();
       ASTNode node = factor();
       return new UnaryMinusNode(node);
@@ -169,37 +157,37 @@ public class RecursiveDescentParser {
   private ASTNode factor() {
     ASTNode node;
     if (lookahead.getType() == TokenType.NUMBER) {
-      node = new OperandNode(lookahead);
+      node = new NumberLiteralNode(lookahead.getValue());
       match();
     } else if (lookahead.getType() == TokenType.STRING) {
-      node = new OperandNode(lookahead);  
+      node = new StringLiteralNode(lookahead.getValue());
       match();
     } else if (lookahead.getType() == TokenType.IDENTIFIER) {
-      Token functionName = lookahead;
+      String functionName = lookahead.getValue();
       match();
-      if (lookahead.getType() == TokenType.OPERATOR && lookahead.getValue().equals("(")) {
+      if (tokenIsOperator("(")) {
         match();
         ArrayList<ASTNode> arguments = new ArrayList<>();
-        if (lookahead.getType() != TokenType.OPERATOR || !lookahead.getValue().equals(")")) {
+        if (!tokenIsOperator(")")) {
           arguments.add(expression());
-          while (lookahead.getType() == TokenType.OPERATOR && lookahead.getValue().equals(",")) {
+          while (tokenIsOperator(",")) {
             match();
             arguments.add(expression());
           }
         }
-        if (lookahead.getType() == TokenType.OPERATOR && lookahead.getValue().equals(")")) {
+        if (tokenIsOperator(")")) {
           match();
           node = new FunctionCallNode(functionName, arguments);
         } else {
           throw new RuntimeException("Expected )");
         }
       } else {
-        node = new OperandNode(functionName);
+        node = new IdentifierNode(functionName);
       }
-    } else if (lookahead.getType() == TokenType.OPERATOR && lookahead.getValue().equals("(")) {
+    } else if (tokenIsOperator("(")) {
       match();
       node = new ParenthesesNode(expression());
-      if (lookahead.getType() == TokenType.OPERATOR && lookahead.getValue().equals(")")) {
+      if (tokenIsOperator(")")) {
         match();
       } else {
         throw new RuntimeException("Expected )");
@@ -224,5 +212,9 @@ public class RecursiveDescentParser {
     } else {
       throw new RuntimeException("Unexpected token: " + lookahead);
     }
+  }
+
+  private boolean tokenIsOperator(String operator) {
+    return lookahead.getType() == TokenType.OPERATOR && lookahead.getValue().equals(operator);
   }
 }
