@@ -1,0 +1,47 @@
+Welcome to El Camino BASIC, the state-of-the-art programming
+environment for the Class of 1985!
+
+Statements
+----------
+PRINT "Hello, world!"
+INPUT NAME$
+NAME$ = "Joe"
+PI = 3.14159
+GOTO 10
+IF X < 3 THEN PRINT "foo"
+LET X=1 (LET is optional for variable declarations)
+
+Numbering lines
+---------------
+10 I=1
+20 PRINT I
+30 I=I+1
+40 IF X <= 100 THEN GOTO 20
+
+Interpreter commands
+--------------------
+RUN              - Run the program
+LIST             - List all lines in program
+SAVE "foo.basic" - Save current program to disk
+LOAD "foo.basic" - Load a program from disk,
+                   clearing current program
+QUIT             - Quit the interpreter
+
+Note that file names are case sensitive!
+
+Operators supported in expressions
+----------------------------------
++, -, *, /
+<, >, <=, >=, =, <>
+
+Functions supported in expressions
+----------------------------------
+INT(x)  - Convert x to integer
+SQRT(x) - Square root of x
+RND()   - Return a random number
+
+An uninitialized number variable X has value 0
+An uninitialized string variable X$ has value ""
+
+*WARNING: The implementations of INPUT, IF, and RND() have
+ been omitted as an exercise to the reader.

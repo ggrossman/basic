@@ -1,0 +1,14 @@
+10 REM This is the BASIC equivalent of the rollSnakeEyes exercise
+20 REM from the Unit 4 Test.
+30 REM If you've implemented the BASIC features required for this
+40 REM project, this code should run correctly.
+50 REM You will need to implement the RND() function
+60 REM and the IF statement.
+100 PRINT "COMPUTING HOW MANY ROLLS IT TAKES TO GET SNAKE EYES"
+110 ROLLS = 0
+120 DIE1 = INT(RND() * 6 + 1)
+130 DIE2 = INT(RND() * 6 + 1)
+140 ROLLS = ROLLS + 1
+150 IF DIE1 <> 1 THEN GOTO 120
+160 IF DIE2 <> 1 THEN GOTO 120
+170 PRINT "IT TOOK " + ROLLS + " ROLLS TO GET SNAKE EYES"
